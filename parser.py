@@ -1,7 +1,3 @@
-from pprint import pprint
-
-import copy
-
 import re
 
 
@@ -96,6 +92,7 @@ def create_parser(grammar_filename):
 
 if __name__ == '__main__':
     import sys
+    from pprint import pprint
 
     if len(sys.argv) < 2:
         print ('Please supply an input file')
