@@ -23,7 +23,7 @@ def lines_group_parser(list_name, iterations_varname, subparser):
         iterations_nb = int(state[iterations_varname])
         state[list_name] = []
         for _ in range(iterations_nb):
-            state[list_name].append(file_parser(subparser, input_lines, state))
+            state[list_name].append(file_parser(subparser, input_lines))
     return f
 
 
@@ -47,7 +47,7 @@ def extract_subgrammar(grammar_lines):
     return subgrammar
 
 
-def file_parser(line_parsers, input_lines, state, repeat=1):
+def file_parser(line_parsers, input_lines, repeat=1):
     res = {}
     line_parsers = line_parsers * repeat
     while input_lines and line_parsers:
@@ -85,7 +85,7 @@ def create_parser(grammar_filename):
     def parser(input_filename):
         with open(input_filename) as input_file:
             input_lines = [line.strip() for line in input_file.read().split('\n') if line]
-            return file_parser(line_parsers[:], input_lines, {})
+            return file_parser(line_parsers[:], input_lines)
 
     return parser
 
