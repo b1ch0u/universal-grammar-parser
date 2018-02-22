@@ -85,7 +85,7 @@ def create_parser(grammar_filename):
     def parser(input_filename):
         with open(input_filename) as input_file:
             input_lines = [line.strip() for line in input_file.read().split('\n') if line]
-            return file_parser(line_parsers, input_lines, {})
+            return file_parser(line_parsers[:], input_lines, {})
 
     return parser
 
