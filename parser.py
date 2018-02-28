@@ -2,14 +2,16 @@ import re
 
 
 SIMPLE_WORDS_RE = r'^(\s?\w+)+$'
+RAW_LINES_RE = r'^(\w+)\s?:\s?(\w+)\s?\*\s?RAW$'
 OPEN_MULT_RE = r'^(\w+)\s?:\s?(\w+)\s?\*\s?\[$'
 CLOSE_MULT_RE = r'^\s*\]$'
 
 
-all_lines_re = [SIMPLE_WORDS_RE, OPEN_MULT_RE, CLOSE_MULT_RE]
+all_lines_re = [SIMPLE_WORDS_RE, RAW_LINES_RE, OPEN_MULT_RE, CLOSE_MULT_RE]
 
 
-def simple_words_parser(words):
+def simple_words_parser(line):
+    words = line.split(' ')
     def f(input_lines, state):
         values = input_lines.pop(0).split(' ')
         if len(values) != len(words):
@@ -24,6 +26,15 @@ def lines_group_parser(list_name, iterations_varname, subparser):
         state[list_name] = []
         for _ in range(iterations_nb):
             state[list_name].append(file_parser(subparser, input_lines))
+    return f
+
+
+def raw_lines_parser(list_name, iterations_varname):
+    def f(input_lines, state):
+        iterations_nb = int(state[iterations_varname])
+        state[list_name] = []
+        for _ in range(iterations_nb):
+            state[list_name].append(input_lines.pop(0))
     return f
 
 
@@ -61,15 +72,18 @@ def file_parser(line_parsers, input_lines, repeat=1):
 def create_line_parsers(grammar_lines):
     line_parsers = []
     while grammar_lines:
-        line = grammar_lines.pop(0)
+        line = grammar_lines.pop(0).strip()
         if re.match(SIMPLE_WORDS_RE, line):
-            line_parsers.append(simple_words_parser(line.split(' ')))
+            line_parsers.append(simple_words_parser(line))
         elif re.match(OPEN_MULT_RE, line):
             list_name, iterations_varname = re.search(OPEN_MULT_RE, line).group(1,2)
             subgrammar = extract_subgrammar(grammar_lines)
             subparser = create_line_parsers(subgrammar)
             group_parser = lines_group_parser(list_name, iterations_varname, subparser)
             line_parsers.append(group_parser)
+        elif re.match(RAW_LINES_RE, line):
+            list_name, iterations_varname = re.search(RAW_LINES_RE, line).group(1,2)
+            line_parsers.append(raw_lines_parser(list_name, iterations_varname))
     return line_parsers
 
 

@@ -1,0 +1,2 @@
+rows columns min_ingr max_cells
+lines : rows * RAW
